@@ -1,4 +1,4 @@
-﻿// ================= UIEXPLOSIONES.JS =================
+// ================= UIEXPLOSIONES.JS =================
 // Interfaz, sonidos, semáforo y registros
 console.log("✅ init() ejecutado correctamente");
 
@@ -20,6 +20,8 @@ console.log("✅ init() ejecutado correctamente");
     seleccionadas: new Set(["BTC","ETH","ADA","SOL"]),
     timer: null,
     lastAlertKey: {},
+    countdownTimer: null,      // 🕒 nuevo: referencia del temporizador del contador
+    countdownValue: 0,         // 🕒 nuevo: segundos restantes
   };
 
   const $ = sel => document.querySelector(sel);
@@ -43,6 +45,7 @@ console.log("✅ init() ejecutado correctamente");
   const btnClear = $("#btn-clear");
   const btnSonido= $("#btn-sonido");
   const tbody = $("#tabla-registros");
+  const countdownEl = $("#countdown"); // 🕒 elemento visual del contador
 
   // ======= Inicio =======
   function init(){
@@ -86,6 +89,8 @@ console.log("✅ init() ejecutado correctamente");
     btnStop .addEventListener("click", stop);
     btnClear.addEventListener("click", clearRegistros);
     btnSonido.addEventListener("click", toggleSonido);
+
+    if (countdownEl) countdownEl.textContent = "--"; // 🕒 inicializa
   }
 
   function stepInterval(dir){
@@ -201,40 +206,84 @@ console.log("✅ init() ejecutado correctamente");
     }catch(e){}
   }
 
+  // 🕒 ======= Cuenta atrás sincronizada =======
+  function startCountdown() {
+    if (!countdownEl) return;
+    clearInterval(EC.countdownTimer);
+    EC.countdownValue = Math.floor(FETCH_INTERVAL_MS / 1000);
+    countdownEl.textContent = EC.countdownValue + "s";
+
+    EC.countdownTimer = setInterval(() => {
+      if (!EC.running) return;
+      EC.countdownValue--;
+      if (EC.countdownValue < 0) EC.countdownValue = Math.floor(FETCH_INTERVAL_MS / 1000);
+      countdownEl.textContent = EC.countdownValue + "s";
+      countdownEl.style.color = (EC.countdownValue <= 5) ? "var(--accent-2)" : "var(--accent)";
+    }, 1000);
+  }
+
   // ======= Bucle principal =======
   async function tick(){
     if (!EC.running) return;
+    startCountdown(); // 🕒 reinicia cuenta atrás al comenzar análisis
     const interval = INTERVALOS[EC.intervaloIdx];
-    const statusText = document.getElementById("status-text"); // único destino del mensaje
+    const statusText = document.getElementById("status-text");
 
-    for (const base of Array.from(EC.seleccionadas)){
+    // 🧹 Limpiamos el texto antes de empezar un nuevo ciclo
+    if (statusText) statusText.innerHTML = "";
+
+    for (const base of Array.from(EC.seleccionadas)) {
       const symbol = base + "USDT";
-      try{
+      try {
         const res = await window.EC_fetchLatestStats(symbol, interval);
         if (!res) continue;
-        const { changePct, tipo, openTime } = res;
 
-        // ✅ Mostrar solo un mensaje en el div "status-text"
+        const { changePct, tipo, openTime } = res;
+        const hora = new Date().toLocaleTimeString();
+
+        // 🧩 Añadimos cada análisis en una nueva línea
         if (statusText) {
-          const hora = new Date().toLocaleTimeString();
-          statusText.textContent = 
-            `Analizando ${base} ${interval} ${hora} — Oscilación (${changePct.toFixed(2)}%) de su valor`;
+          statusText.innerHTML += `Analizando ${base} ${interval} ${hora} — Oscilación (${changePct.toFixed(2)}%) de su valor<br>`;
         }
 
-        // Detección de explosión
+        // ⚙️ Detección de explosión
         const minOk = changePct >= EC.umbralMin || changePct <= -EC.umbralMin;
         const maxOk = !isFinite(EC.umbralMax) ? true : (Math.abs(changePct) <= EC.umbralMax);
         const key = symbol + "_" + openTime;
 
-        if (minOk && maxOk && tipo){
-          if (!EC.lastAlertKey[key]){
+        if (minOk && maxOk && tipo) {
+          if (!EC.lastAlertKey[key]) {
             EC.lastAlertKey[key] = true;
             setSemaforo(tipo);
             beep(tipo);
+
+            // 🟢 Nuevo: registrar evento en tabla
+            addRegistro({ symbol, interval, hora, changePct, tipo });
           }
         }
-      }catch(err){}
+
+      } catch (err) {
+        console.error("❌ Error al analizar", base, err);
+      }
     }
+  }
+
+  // 🟢 NUEVA FUNCIÓN: Añade filas en la tabla de registros
+  function addRegistro({ symbol, interval, hora, changePct, tipo }) {
+    if (!tbody) return;
+    const tr = document.createElement("tr");
+    tr.classList.add("new");
+    tr.innerHTML = `
+      <td>${symbol}</td>
+      <td>${interval}</td>
+      <td>${hora}</td>
+      <td>${changePct.toFixed(2)}%</td>
+      <td>${tipo}</td>
+      <td>—</td>
+      <td>—</td>
+      <td>—</td>
+    `;
+    tbody.prepend(tr); // se añade arriba del todo
   }
 
   function start(){
@@ -243,14 +292,17 @@ console.log("✅ init() ejecutado correctamente");
     setSemaforo("off");
     tick();
     EC.timer = setInterval(tick, FETCH_INTERVAL_MS);
+    startCountdown(); // 🕒 arranca cuenta atrás al iniciar
   }
 
   function stop(){
     EC.running = false;
     if (EC.timer){ clearInterval(EC.timer); EC.timer = null; }
+    clearInterval(EC.countdownTimer); // 🕒 detener contador
     setSemaforo("off");
     const statusText = document.getElementById("status-text");
     if (statusText) statusText.textContent = "Preparado para analizar...";
+    if (countdownEl) countdownEl.textContent = "--";
   }
 
   if (document.readyState === "loading") {
