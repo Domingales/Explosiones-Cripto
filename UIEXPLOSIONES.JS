@@ -20,8 +20,8 @@ console.log("✅ init() ejecutado correctamente");
     seleccionadas: new Set(["BTC","ETH","ADA","SOL"]),
     timer: null,
     lastAlertKey: {},
-    countdownTimer: null,      // 🕒 nuevo: referencia del temporizador del contador
-    countdownValue: 0,         // 🕒 nuevo: segundos restantes
+    countdownTimer: null,
+    countdownValue: 0,
   };
 
   const $ = sel => document.querySelector(sel);
@@ -45,7 +45,7 @@ console.log("✅ init() ejecutado correctamente");
   const btnClear = $("#btn-clear");
   const btnSonido= $("#btn-sonido");
   const tbody = $("#tabla-registros");
-  const countdownEl = $("#countdown"); // 🕒 elemento visual del contador
+  const countdownEl = $("#countdown");
 
   // ======= Inicio =======
   function init(){
@@ -90,7 +90,7 @@ console.log("✅ init() ejecutado correctamente");
     btnClear.addEventListener("click", clearRegistros);
     btnSonido.addEventListener("click", toggleSonido);
 
-    if (countdownEl) countdownEl.textContent = "--"; // 🕒 inicializa
+    if (countdownEl) countdownEl.textContent = "--";
   }
 
   function stepInterval(dir){
@@ -134,27 +134,33 @@ console.log("✅ init() ejecutado correctamente");
     });
   }
 
+  // 🔴 Actualizado: incluye opción de apagado “off”
   function setSemaforo(tipo){
     ledVerde.classList.remove("verde");
-    ledRojo .classList.remove("roja");
-    if (tipo==="alcista") ledVerde.classList.add("verde");
-    else if (tipo==="bajista") ledRojo.classList.add("roja");
+    ledRojo.classList.remove("roja");
+    if (tipo === "alcista") ledVerde.classList.add("verde");
+    else if (tipo === "bajista") ledRojo.classList.add("roja");
+    // tipo "off" deja ambos apagados
   }
 
-  function beep(tipo="alcista"){
-    if (!EC.sonidoActivo) return;
+  function beep(tipo="alcista"){                       
+    if (!EC.sonidoActivo) return;                    
     try{
-      const ctx = new (window.AudioContext||window.webkitAudioContext)();
-      const o = ctx.createOscillator();
-      const g = ctx.createGain();
-      o.connect(g); g.connect(ctx.destination);
-      o.type = "sawtooth";
-      o.frequency.value = (tipo==="alcista") ? 880 : 330;
-      g.gain.setValueAtTime(0.0001, ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.2, ctx.currentTime+0.01);
-      g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+0.35);
-      o.start(); o.stop(ctx.currentTime+0.38);
-    }catch(e){}
+      const ctx = new (window.AudioContext||window.webkitAudioContext)(); 
+      const o = ctx.createOscillator();              
+      const g = ctx.createGain();                    
+      o.connect(g); g.connect(ctx.destination);      
+      o.type = "sawtooth";                           
+      o.frequency.value = (tipo==="alcista") ? 780 : 630; 
+
+      g.gain.setValueAtTime(1.0, ctx.currentTime);   
+      g.gain.exponentialRampToValueAtTime(1.0, ctx.currentTime + 0.1); 
+      g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 5); 
+      o.start();                                     
+      o.stop(ctx.currentTime + 5);                   
+    }catch(e){                                       
+      console.warn("⚠️ Error al reproducir el sonido:", e);
+    }
   }
 
   function toggleSonido(){
@@ -225,11 +231,9 @@ console.log("✅ init() ejecutado correctamente");
   // ======= Bucle principal =======
   async function tick(){
     if (!EC.running) return;
-    startCountdown(); // 🕒 reinicia cuenta atrás al comenzar análisis
+    startCountdown();
     const interval = INTERVALOS[EC.intervaloIdx];
     const statusText = document.getElementById("status-text");
-
-    // 🧹 Limpiamos el texto antes de empezar un nuevo ciclo
     if (statusText) statusText.innerHTML = "";
 
     for (const base of Array.from(EC.seleccionadas)) {
@@ -238,15 +242,13 @@ console.log("✅ init() ejecutado correctamente");
         const res = await window.EC_fetchLatestStats(symbol, interval);
         if (!res) continue;
 
-        const { changePct, tipo, openTime } = res;
+        const { changePct, tipo, openTime, openPrice, high, low, closePrice } = res;
         const hora = new Date().toLocaleTimeString();
 
-        // 🧩 Añadimos cada análisis en una nueva línea
         if (statusText) {
-          statusText.innerHTML += `Analizando ${base} ${interval} ${hora} — Oscilación (${changePct.toFixed(2)}%) de su valor<br>`;
+          statusText.innerHTML += `Analizando ${base} ${interval} ${hora} — Oscilación (${changePct.toFixed(3)}%)<br>`;
         }
 
-        // ⚙️ Detección de explosión
         const minOk = changePct >= EC.umbralMin || changePct <= -EC.umbralMin;
         const maxOk = !isFinite(EC.umbralMax) ? true : (Math.abs(changePct) <= EC.umbralMax);
         const key = symbol + "_" + openTime;
@@ -257,19 +259,21 @@ console.log("✅ init() ejecutado correctamente");
             setSemaforo(tipo);
             beep(tipo);
 
-            // 🟢 Nuevo: registrar evento en tabla
-            addRegistro({ symbol, interval, hora, changePct, tipo });
+            // 🟢 Registro extendido con precios OHLC
+            addRegistro({
+              symbol, interval, hora, changePct, tipo,
+              open: openPrice, high, low, close: closePrice
+            });
           }
         }
-
       } catch (err) {
         console.error("❌ Error al analizar", base, err);
       }
     }
   }
 
-  // 🟢 NUEVA FUNCIÓN: Añade filas en la tabla de registros
-  function addRegistro({ symbol, interval, hora, changePct, tipo }) {
+  // 🟢 Añade filas con datos completos (incluye OHLC)
+  function addRegistro({ symbol, interval, hora, changePct, tipo, open, high, low, close }) {
     if (!tbody) return;
     const tr = document.createElement("tr");
     tr.classList.add("new");
@@ -277,13 +281,13 @@ console.log("✅ init() ejecutado correctamente");
       <td>${symbol}</td>
       <td>${interval}</td>
       <td>${hora}</td>
-      <td>${changePct.toFixed(2)}%</td>
+      <td>${changePct.toFixed(3)}%</td>
       <td>${tipo}</td>
-      <td>—</td>
-      <td>—</td>
-      <td>—</td>
+      <td>${open?.toFixed(3) ?? "—"}</td>
+      <td>${high?.toFixed(3) ?? "—"}/${low?.toFixed(3) ?? "—"}</td>
+      <td>${close?.toFixed(3) ?? "—"}</td>
     `;
-    tbody.prepend(tr); // se añade arriba del todo
+    tbody.prepend(tr);
   }
 
   function start(){
@@ -292,13 +296,13 @@ console.log("✅ init() ejecutado correctamente");
     setSemaforo("off");
     tick();
     EC.timer = setInterval(tick, FETCH_INTERVAL_MS);
-    startCountdown(); // 🕒 arranca cuenta atrás al iniciar
+    startCountdown();
   }
 
   function stop(){
     EC.running = false;
     if (EC.timer){ clearInterval(EC.timer); EC.timer = null; }
-    clearInterval(EC.countdownTimer); // 🕒 detener contador
+    clearInterval(EC.countdownTimer);
     setSemaforo("off");
     const statusText = document.getElementById("status-text");
     if (statusText) statusText.textContent = "Preparado para analizar...";
