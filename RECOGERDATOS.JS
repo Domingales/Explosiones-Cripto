@@ -1,4 +1,4 @@
-﻿// ================= RECOGERDATOS.JS =================
+// ================= RECOGERDATOS.JS =================
 // Versión adaptada a Explosiones Criptos V1.0
 // Igual método que la app CriptoAnalisis del alma (fetch directo limpio a Binance)
 
