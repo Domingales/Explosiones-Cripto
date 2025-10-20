@@ -1,4 +1,4 @@
-﻿// ================= PROCESAREXPLOSIONES.JS =================
+// ================= PROCESAREXPLOSIONES.JS =================
 // Filtro final de umbrales y despacho a UI (tabla + semáforo + sonido)
 
 (() => {
@@ -13,8 +13,12 @@
     const { changePct } = stats;
     const { min, max } = umbrales;
 
-    const overMin = Math.abs(changePct) >= min;
-    const underMax = !isFinite(max) ? true : Math.abs(changePct) <= max;
+    const change = Number(changePct);
+    if (isNaN(change)) return false; // seguridad extra
+    const rounded = parseFloat(change.toFixed(3)); // solo 3 decimales
+
+    const overMin = Math.abs(rounded) >= min;
+    const underMax = !isFinite(max) ? true : Math.abs(rounded) <= max;
 
     return overMin && underMax;
   };
