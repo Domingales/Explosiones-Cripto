@@ -1,10 +1,7 @@
 // ================= RECOGERDATOS.JS =================
 // Versión adaptada a Explosiones Criptos V1.0
-// Igual método que la app CriptoAnalisis del alma (fetch directo limpio a Binance)
+// Igual método que la app CriptoAnalisis (fetch directo limpio a Binance)
 
-// ---------------------------------------------------
-// 🔧 Función principal: obtiene velas OHLCV desde Binance
-// ---------------------------------------------------
 (async () => {
   const API_URL = "https://api.binance.com/api/v3/klines";
 
@@ -27,10 +24,7 @@
     }
   }
 
-  /**
-   * Transforma los datos crudos en objetos OHLC.
-   * @param {Array} k - Array [openTime, open, high, low, close, volume, closeTime, ...]
-   */
+  /** Transforma los datos crudos en objetos OHLC */
   function parseKline(k) {
     return {
       openTime: Number(k[0]),
@@ -61,12 +55,12 @@
       const last = klines[klines.length - 1];
       const now = Date.now();
       const isClosed = now >= last.closeTime;
-      const idx = isClosed ? klines.length - 1 : klines.length - 2;
+      const idx = Math.max(1, isClosed ? klines.length - 1 : klines.length - 2);
 
       const cur = klines[idx];
-      const prevs = klines.slice(idx - 10, idx);
+      const prevs = klines.slice(Math.max(0, idx - 10), idx);
 
-      // Promedio de volumen y rangos previos
+      // Promedios de volumen y rangos previos
       const volAvg = avg(prevs.map(k => k.volume));
       const prevHigh = Math.max(...prevs.map(k => k.high));
       const prevLow = Math.min(...prevs.map(k => k.low));
@@ -77,7 +71,7 @@
       const low = cur.low;
       const vol = cur.volume;
 
-      const changePct = ((close - open) / open) * 100;
+      const changePct = parseFloat((((close - open) / open) * 100).toFixed(3));
       const green = close > open;
       const red = close < open;
       const volHigh = vol > volAvg * 1.5; // volumen anómalo
@@ -92,12 +86,12 @@
       return {
         symbol,
         openTime: cur.openTime,
-        openPrice: open,
-        high,
-        low,
-        closePrice: close,
-        volume: vol,
-        volAvg,
+        openPrice: parseFloat(open.toFixed(3)),
+        high: parseFloat(high.toFixed(3)),
+        low: parseFloat(low.toFixed(3)),
+        closePrice: parseFloat(close.toFixed(3)),
+        volume: parseFloat(vol.toFixed(3)),
+        volAvg: parseFloat(volAvg.toFixed(3)),
         changePct,
         tipo
       };
@@ -107,9 +101,7 @@
     }
   }
 
-  // ---------------------------------------------------
   // 🌍 Exponer función global para la app
-  // ---------------------------------------------------
   window.EC_fetchLatestStats = getLatestStats;
 
   // ---------------------------------------------------
@@ -118,6 +110,6 @@
   // - Sin 'mode:no-cors'
   // - Sin cabeceras personalizadas
   // - Sin necesidad de proxy
-  // Funciona correctamente en PC, WebIntoApp, y APK
+  // Funciona correctamente en PC, WebIntoApp y APK Android
   // ---------------------------------------------------
 })();
