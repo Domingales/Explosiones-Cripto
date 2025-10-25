@@ -21,126 +21,67 @@
     }
 
     html,body{
-      height:100%;margin:0; /* ← posición general del documento */
-      background:var(--bg);color:var(--text);
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial
+      min-height:100%; margin:0;
+      background:var(--bg); color:var(--text);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial;
     }
-    .wrap{max-width:100%;margin:0 auto;padding:10%} /* ← margen/padding global */
+    .wrap{max-width:100%; margin:0 auto; padding:10%}
     header{
       background:linear-gradient(180deg,#0f1a33 0%, #0b1024 100%);
-      border:1px solid #1f2a44;border-radius:var(--radius);
-      padding:1% 1% 10%;box-shadow:var(--shadow); /* ← posición de la caja principal (header) */
+      border:1px solid #1f2a44; border-radius:var(--radius);
+      padding:1% 1% 10%; box-shadow:var(--shadow);
     }
-    h1{margin:0;font-size:1.4rem;letter-spacing:.2px}
-    .sub{color:var(--muted);margin-top:6px;font-size:.92rem}
+    h1{margin:0; font-size:1.4rem; letter-spacing:.2px}
+    .sub{color:var(--muted); margin-top:6px; font-size:.92rem}
 
-    .controls{
-      display:grid;gap:2%;margin-top:6%; /* ← posición del bloque que agrupa las tres cajas */
-      grid-template-columns: 1fr; 
-    }
-    @media(min-width:768px){
-      .controls{grid-template-columns: 1fr 1fr 1fr;} /* ← distribución horizontal en pantallas grandes */
-    }
-    .card{
-      background:var(--panel);border:1px solid #1c2742;
-      border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);
-    }
-    .title{font-weight:600;margin-bottom:8px}
-    .row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-    .pill{
-      background:var(--panel-2);border:1px solid #1d2845;
-      border-radius:12px;padding:6px 10px;color:var(--muted);
-      font-size:.92rem;display:inline-flex;align-items:center;gap:10px
-    }
-    button, .btn{
-      cursor:pointer;border:none;border-radius:12px;
-      padding:10px 14px;background:#18233f;color:#cfe0ff;box-shadow:var(--shadow);
-    }
+    .controls{display:grid; gap:2%; margin-top:6%; grid-template-columns:1fr}
+    @media(min-width:768px){ .controls{grid-template-columns:1fr 1fr 1fr} }
+    .card{background:var(--panel); border:1px solid #1c2742; border-radius:var(--radius); padding:14px; box-shadow:var(--shadow)}
+    .title{font-weight:600; margin-bottom:8px}
+    .row{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+    .pill{background:var(--panel-2); border:1px solid #1d2845; border-radius:12px; padding:6px 10px; color:var(--muted); font-size:.92rem; display:inline-flex; align-items:center; gap:10px}
+    button,.btn{cursor:pointer; border:none; border-radius:12px; padding:10px 14px; background:#18233f; color:#cfe0ff; box-shadow:var(--shadow)}
     button:hover{filter:brightness(1.06)}
-    .btn-ghost{background:transparent;border:1px solid #263458}
-    .btn-ok{background:var(--ok);color:#08210f}
-    .btn-bad{background:var(--bad);color:#2c0407}
-    .btn-small{padding:6px 10px;border-radius:10px;font-size:.9rem}
+    .btn-ghost{background:transparent; border:1px solid #263458}
+    .btn-ok{background:var(--ok); color:#08210f}
+    .btn-bad{background:var(--bad); color:#2c0407}
+    .btn-small{padding:6px 10px; border-radius:10px; font-size:.9rem}
 
-    .intervalo-box{display:flex;align-items:center;gap:10px}
-    .intervalo{
-      min-width:86px;text-align:center;background:#0e1730;
-      border:1px solid #203058;border-radius:10px;
-      padding:8px 12px;font-weight:700
-    }
-    .arrow{
-      width:36px;height:36px;border-radius:10px;
-      display:grid;place-items:center;font-weight:800;
-      background:#0e1730;border:1px solid #203058
-    }
+    .intervalo-box{display:flex; align-items:center; gap:10px}
+    .intervalo{min-width:86px; text-align:center; background:#0e1730; border:1px solid #203058; border-radius:10px; padding:8px 12px; font-weight:700}
+    .arrow{width:36px; height:36px; border-radius:10px; display:grid; place-items:center; font-weight:800; background:#0e1730; border:1px solid #203058}
 
     .slider-wrap input[type=range]{width:100%}
-    .val{font-variant-numeric:tabular-nums;font-weight:700}
+    .val{font-variant-numeric:tabular-nums; font-weight:700}
 
-    .accordion{border:1px solid #203058;border-radius:12px;
-      overflow:hidden;background:#0e1730}
-    .accordion-head{
-      display:flex;align-items:center;justify-content:space-between;
-      padding:12px 14px;cursor:pointer
-    }
-    .accordion-body{
-      display:none;padding:10px 12px;border-top:1px solid #203058;
-      background:#0b142b
-    }
+    .accordion{border:1px solid #203058; border-radius:12px; overflow:hidden; background:#0e1730}
+    .accordion-head{display:flex; align-items:center; justify-content:space-between; padding:12px 14px; cursor:pointer}
+    .accordion-body{display:none; padding:10px 12px; border-top:1px solid #203058; background:#0b142b}
     .grid-cryptos{columns:2}
     @media(min-width:768px){.grid-cryptos{columns:3}}
-    .grid-cryptos label{display:block;padding:6px 4px;color:#cfe0ff}
+    .grid-cryptos label{display:block; padding:6px 4px; color:#cfe0ff}
 
-    .status{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      flex-wrap:wrap;
-      position:relative; /* ← controla posición relativa del semáforo y texto */
-    }
-    .semaforo{display:flex;gap:15%}
-    .dot{
-      width:24px;height:24px;border-radius:50%;
-      background:#2a3458;border:1px solid #3c4a72;
-      box-shadow:0 0 0 2px rgba(0,0,0,.25) inset;
-    }
-    .dot.verde{background:#19e27a;border-color:#2f8d5d;
-      box-shadow:0 0 16px 0 rgba(25,226,122,.4)}
-    .dot.roja{background:#ff5a76;border-color:#a12d42;
-      box-shadow:0 0 16px 0 rgba(255,90,118,.35)}
+    .status{display:flex; align-items:center; gap:10px; flex-wrap:wrap; position:relative}
+    .semaforo{display:flex; gap:15%}
+    .dot{width:24px; height:24px; border-radius:50%; background:#2a3458; border:1px solid #3c4a72; box-shadow:0 0 0 2px rgba(0,0,0,.25) inset}
+    .dot.verde{background:#19e27a; border-color:#2f8d5d; box-shadow:0 0 16px 0 rgba(25,226,122,.4)}
+    .dot.roja{background:#ff5a76; border-color:#a12d42; box-shadow:0 0 16px 0 rgba(255,90,118,.35)}
 
-    table{
-      width:100%;border-collapse:collapse;margin-top:10%; /* ← separación superior de la tabla */
-      background:#0f1731;border:1px solid #203058;border-radius:12px;
-      overflow:hidden
-    }
-    thead th{
-      position:sticky;top:0;background:#0e1730;color:#cfe0ff;
-      text-align:left;padding:10px;border-bottom:1px solid #203058
-    }
-    tbody td{
-      padding:8px 10px;border-bottom:1px solid #1b2a4d;color:#dbe6ff
-    }
+    table{width:100%; border-collapse:collapse; margin-top:10%; background:#0f1731; border:1px solid #203058; border-radius:12px; overflow:hidden}
+    thead th{position:sticky; top:0; background:#0e1730; color:#cfe0ff; text-align:left; padding:10px; border-bottom:1px solid #203058}
+    tbody td{padding:8px 10px; border-bottom:1px solid #1b2a4d; color:#dbe6ff}
     tbody tr.new{animation:flash 1.2s ease}
     @keyframes flash{0%{background:#0a3b2a}100%{background:transparent}}
 
-    .footer-note{color:#7fa4ff66;font-size:.85rem;margin-top:10px}
+    .footer-note{color:#7fa4ff66; font-size:.85rem; margin-top:10px}
 
-    /* ==== Ajuste visual fijo del contador de análisis ==== */
-#countdown {
-  font-size: 0.9rem;
-  color: var(--accent);
-  background: rgba(25,35,55,0.85);
-  padding: 4px 10px;
-  border-radius: 8px;
-  border: 1px solid #1e3a5f;
-  box-shadow: 0 0 6px rgba(0,0,0,0.3);
-  font-variant-numeric: tabular-nums;
-  min-width: 48px;
-  text-align: center;
-  margin-left: 1%;
-  height: fit-content; /* ← controla altura automática del contador */
-}
+    /* contador */
+    #countdown{
+      font-size:0.9rem; color:var(--accent); background:rgba(25,35,55,0.85);
+      padding:4px 10px; border-radius:8px; border:1px solid #1e3a5f;
+      box-shadow:0 0 6px rgba(0,0,0,0.3); font-variant-numeric:tabular-nums;
+      min-width:48px; text-align:center; margin-left:1%; height:fit-content;
+    }
   </style>
 </head>
 <body>
@@ -149,9 +90,8 @@
       <h1>Explosiones Criptos V 1.0</h1>
       <div class="sub">Detector en tiempo real de picos bruscos (Binance)</div>
 
-      <!-- 🔷 INICIO BLOQUE DE CONTROLES PRINCIPALES (Intervalo / Sensibilidad / Criptos) -->
       <div class="controls">
-        <!-- 🟩 CAJA INTERVALO -->
+        <!-- Intervalo -->
         <div class="card">
           <div class="title">Intervalo</div>
           <div class="intervalo-box">
@@ -161,34 +101,28 @@
           </div>
           <div class="footer-note">Cicla entre: 5m • 10m • 15m • 30m • 1h • 2h</div>
         </div>
-        <!-- 🟩 FIN CAJA INTERVALO -->
 
-        <!-- 🟦 CAJA SENSIBILIDAD DE EXPLOSIÓN -->
+        <!-- Sensibilidad -->
         <div class="card">
           <div class="title">Sensibilidad de explosión (%)</div>
           <div class="slider-wrap">
-            <div class="row" style="justify-content:space-between"> <!-- ← alineación horizontal interna -->
+            <div class="row" style="justify-content:space-between">
               <div class="pill">Mínimo: <span class="val" id="umbral-min-val">15%</span></div>
-              <label class="row pill" style="gap:8px;">
-                Máximo: <span class="val" id="umbral-max-val">∞</span>
-              </label>
+              <label class="row pill" style="gap:8px;">Máximo: <span class="val" id="umbral-max-val">∞</span></label>
             </div>
             <input id="umbral-min" type="range" min="0" max="100" step="1" value="15" />
-            <div class="row" style="margin-top:8px;align-items:center;gap:8px"> <!-- ← margen superior -->
+            <div class="row" style="margin-top:8px; align-items:center; gap:8px">
               <input id="sin-limite" type="checkbox" checked />
               <label for="sin-limite" class="pill">Sin límite superior (∞)</label>
             </div>
-            <div id="umbral-max-wrap" class="row" style="display:none;margin-top:8px"> <!-- ← control visual -->
+            <div id="umbral-max-wrap" class="row" style="display:none; margin-top:8px">
               <input id="umbral-max" type="range" min="1" max="100" step="1" value="100" />
             </div>
           </div>
-          <div class="footer-note">
-            Se activa una alarma cuando la vela supera el % mínimo (y está por debajo del máximo si lo defines).
-          </div>
+          <div class="footer-note">Se activa una alarma cuando la vela supera el % mínimo (y está por debajo del máximo si lo defines).</div>
         </div>
-        <!-- 🟦 FIN CAJA SENSIBILIDAD -->
 
-        <!-- 🟨 CAJA CRIPTOMONEDAS A RASTREAR -->
+        <!-- Criptomonedas -->
         <div class="card">
           <div class="title">Criptomonedas a rastrear</div>
           <div class="accordion" id="acc-cryptos">
@@ -198,44 +132,37 @@
             </div>
             <div class="accordion-body" id="acc-body">
               <div class="grid-cryptos" id="crypto-list"></div>
-              <div class="row" style="justify-content:flex-end;margin-top:8px"> <!-- ← controla separación inferior -->
+              <div class="row" style="justify-content:flex-end; margin-top:8px">
                 <button class="btn-ok btn-small" id="acc-close">✔️ Listo</button>
               </div>
             </div>
           </div>
           <div class="footer-note">El panel se oculta para ocupar lo mínimo en pantalla.</div>
-<div class="row"> <!-- ← posición actual de los botones -->
-          <button class="btn" id="btn-start">Iniciar</button>
-          <button class="btn-ghost" id="btn-stop">Detener</button>
-          <button class="btn-ghost" id="btn-clear">Vaciar registros</button>
-          <button class="btn-ghost" id="btn-sonido">🔊 Sonido: ON</button>
+          <div class="row">
+            <button class="btn" id="btn-start">Iniciar</button>
+            <button class="btn-ghost" id="btn-stop">Detener</button>
+            <button class="btn-ghost" id="btn-clear">Vaciar registros</button>
+            <button class="btn-ghost" id="btn-sonido">🔊 Sonido: ON</button>
+          </div>
         </div>
-
-        </div>
-        <!-- 🟨 FIN CAJA CRIPTOMONEDAS -->
       </div>
-      <!-- 🔷 FIN BLOQUE DE CONTROLES PRINCIPALES -->
 
-      <!-- 🔴 INICIO BLOQUE ESTADO + CONTROL (Semáforo / Botones / Texto) -->
-      <div class="row" style="margin-top:1%;justify-content:space-between"> <!-- ← margen superior del bloque -->
+      <!-- Estado -->
+      <div class="row" style="margin-top:1%; justify-content:space-between">
         <div class="status">
           <div>Semáforo:</div>
           <div class="semaforo">
             <div class="dot" id="led-verde" title="Explosión alcista"></div>
             <div class="dot" id="led-rojo"  title="Explosión bajista"></div>
           </div>
-          <div id="countdown">--</div>🕒  <!-- 🕒 Contador visible -->
-          <div id="status-text" style="margin-left:1%; color:#9db2d8; font-size:0.9rem; min-height:1.2em;"> <!-- ← texto de estado -->
-            Preparado para analizar...
-          </div>
+          <div id="countdown">--</div>🕒
+          <div id="status-text" style="margin-left:1%; color:#9db2d8; font-size:0.9rem; min-height:1.2em;">Preparado para analizar...</div>
         </div>
       </div>
-      <!-- 🔴 FIN BLOQUE ESTADO + CONTROL -->
     </header>
 
-
-    <!-- 🟢 INICIO CAJA REGISTROS -->
-    <div class="card" style="margin-top:1%"> <!-- ← separación superior de la caja -->
+    <!-- Registros -->
+    <div class="card" style="margin-top:1%">
       <div class="title">Registros de explosiones</div>
       <table>
         <thead>
@@ -248,18 +175,19 @@
             <th>Inicio</th>
             <th>Máx/Mín</th>
             <th>Fin</th>
+            <th>Volumen</th>
+            <th>Vol. Medio</th>
           </tr>
         </thead>
         <tbody id="tabla-registros"></tbody>
       </table>
       <div class="footer-note">Los eventos se guardan en localStorage para persistencia local.</div>
     </div>
-    <!-- 🟢 FIN CAJA REGISTROS -->
   </div>
 
-  <!-- Scripts raíz -->
+  <!-- Scripts -->
   <script src="recogerDatos.js" defer></script>
   <script src="procesarExplosiones.js" defer></script>
-  <script src="uiExplosiones.js" defer></script>
+  <script src="uiExplosiones.js?v=2" defer></script> <!-- v=2 para forzar recarga -->
 </body>
 </html>
