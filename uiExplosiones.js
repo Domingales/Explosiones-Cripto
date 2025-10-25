@@ -4,11 +4,11 @@ console.log("✅ init() ejecutado correctamente");
 
 (() => {
   const FETCH_INTERVAL_MS = 60000; // <- AJUSTABLE
-  const INTERVALOS = ["5m","10m","15m","30m","1h","2h"];
+  const INTERVALOS = ["5m", "10m", "15m", "30m", "1h", "2h"];
   const CRYPTOS = [
-    "ADA","AVAX","BCH","BNB","BTC","DOGE","DOT","ETC","ETH","ICP",
-    "LINK","LTC","MANA","MATIC","NEAR","OP","QNT","SHIB","SOL","STX",
-    "SUI","THETA","TON","TRX","UNI","VET","XLM","XRP","XTZ","ZEC"
+    "ADA", "AVAX", "BCH", "BNB", "BTC", "DOGE", "DOT", "ETC", "ETH", "ICP",
+    "LINK", "LTC", "MANA", "MATIC", "NEAR", "OP", "QNT", "SHIB", "SOL", "STX",
+    "SUI", "THETA", "TON", "TRX", "UNI", "VET", "XLM", "XRP", "XTZ", "ZEC"
   ];
 
   window.EC = {
@@ -17,13 +17,14 @@ console.log("✅ init() ejecutado correctamente");
     intervaloIdx: 2, // 15m por defecto
     umbralMin: 15,
     umbralMax: Infinity,
-    seleccionadas: new Set(["BTC","ETH","ADA","SOL"]),
+    seleccionadas: new Set(["BTC", "ETH", "ADA", "SOL"]),
     timer: null,
     lastAlertKey: {},
     countdownTimer: null,
     countdownValue: 0,
   };
 
+  // === Atajos DOM ===
   const $ = sel => document.querySelector(sel);
   const lblIntervalo = $("#intervalo-label");
   const btnPrev = $("#int-prev");
@@ -39,16 +40,16 @@ console.log("✅ init() ejecutado correctamente");
   const accClose = $("#acc-close");
   const cryptoList = $("#crypto-list");
   const ledVerde = $("#led-verde");
-  const ledRojo  = $("#led-rojo");
+  const ledRojo = $("#led-rojo");
   const btnStart = $("#btn-start");
-  const btnStop  = $("#btn-stop");
+  const btnStop = $("#btn-stop");
   const btnClear = $("#btn-clear");
-  const btnSonido= $("#btn-sonido");
+  const btnSonido = $("#btn-sonido");
   const tbody = $("#tabla-registros");
   const countdownEl = $("#countdown");
 
   // ======= Inicio =======
-  function init(){
+  function init() {
     lblIntervalo.textContent = INTERVALOS[EC.intervaloIdx];
     lblMin.textContent = EC.umbralMin + "%";
     lblMax.textContent = "∞";
@@ -66,7 +67,7 @@ console.log("✅ init() ejecutado correctamente");
       persistConfig();
     });
     chkInf.addEventListener("change", () => {
-      if (chkInf.checked){
+      if (chkInf.checked) {
         EC.umbralMax = Infinity;
         wrapMax.style.display = "none";
         lblMax.textContent = "∞";
@@ -86,39 +87,40 @@ console.log("✅ init() ejecutado correctamente");
     accToggle.addEventListener("click", toggleAccordion);
     accClose.addEventListener("click", () => setAccordion(false));
     btnStart.addEventListener("click", start);
-    btnStop .addEventListener("click", stop);
+    btnStop.addEventListener("click", stop);
     btnClear.addEventListener("click", clearRegistros);
     btnSonido.addEventListener("click", toggleSonido);
 
     if (countdownEl) countdownEl.textContent = "--";
   }
 
-  function stepInterval(dir){
+  function stepInterval(dir) {
     EC.intervaloIdx = (EC.intervaloIdx + dir + INTERVALOS.length) % INTERVALOS.length;
     lblIntervalo.textContent = INTERVALOS[EC.intervaloIdx];
     persistConfig();
   }
 
-  function toggleAccordion(){
+  function toggleAccordion() {
     const open = accBody.style.display !== "block";
     setAccordion(open);
   }
-  function setAccordion(open){
+
+  function setAccordion(open) {
     accBody.style.display = open ? "block" : "none";
     accToggle.textContent = open ? "Cerrar" : "Abrir";
   }
 
-  function renderCryptoChecks(){
+  function renderCryptoChecks() {
     cryptoList.innerHTML = "";
-    CRYPTOS.forEach(sym=>{
-      const id = "chk_"+sym;
+    CRYPTOS.forEach(sym => {
+      const id = "chk_" + sym;
       const label = document.createElement("label");
       label.innerHTML = `<input type="checkbox" id="${id}" data-sym="${sym}"> ${sym}/USDT`;
       cryptoList.appendChild(label);
     });
-    cryptoList.addEventListener("change", (e)=>{
+    cryptoList.addEventListener("change", (e) => {
       const el = e.target;
-      if (el && el.matches("input[type=checkbox]")){
+      if (el && el.matches("input[type=checkbox]")) {
         const s = el.getAttribute("data-sym");
         if (el.checked) EC.seleccionadas.add(s);
         else EC.seleccionadas.delete(s);
@@ -127,54 +129,52 @@ console.log("✅ init() ejecutado correctamente");
     });
   }
 
-  function refreshCryptoChecksFromSet(){
-    CRYPTOS.forEach(sym=>{
-      const el = document.getElementById("chk_"+sym);
+  function refreshCryptoChecksFromSet() {
+    CRYPTOS.forEach(sym => {
+      const el = document.getElementById("chk_" + sym);
       if (el) el.checked = EC.seleccionadas.has(sym);
     });
   }
 
-  // 🔴 Actualizado: incluye opción de apagado “off”
-  function setSemaforo(tipo){
+  // 🔴 Semáforo con apagado “off”
+  function setSemaforo(tipo) {
     ledVerde.classList.remove("verde");
     ledRojo.classList.remove("roja");
     if (tipo === "alcista") ledVerde.classList.add("verde");
     else if (tipo === "bajista") ledRojo.classList.add("roja");
-    // tipo "off" deja ambos apagados
   }
 
-  function beep(tipo="alcista"){                       
-    if (!EC.sonidoActivo) return;                    
-    try{
-      const ctx = new (window.AudioContext||window.webkitAudioContext)(); 
-      const o = ctx.createOscillator();              
-      const g = ctx.createGain();                    
-      o.connect(g); g.connect(ctx.destination);      
-      o.type = "sawtooth";                           
-      o.frequency.value = (tipo==="alcista") ? 780 : 630; 
+  function beep(tipo = "alcista") {
+    if (!EC.sonidoActivo) return;
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type = "sawtooth";
+      o.frequency.value = (tipo === "alcista") ? 780 : 630;
 
-      g.gain.setValueAtTime(1.0, ctx.currentTime);   
-      g.gain.exponentialRampToValueAtTime(1.0, ctx.currentTime + 0.1); 
-      g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 5); 
-      o.start();                                     
-      o.stop(ctx.currentTime + 5);                   
-    }catch(e){                                       
+      g.gain.setValueAtTime(1.0, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.5);
+      o.start();
+      o.stop(ctx.currentTime + 1.5);
+    } catch (e) {
       console.warn("⚠️ Error al reproducir el sonido:", e);
     }
   }
 
-  function toggleSonido(){
+  function toggleSonido() {
     EC.sonidoActivo = !EC.sonidoActivo;
     btnSonido.textContent = EC.sonidoActivo ? "🔊 Sonido: ON" : "🔈 Sonido: OFF";
     persistConfig();
   }
 
-  function clearRegistros(){
+  function clearRegistros() {
     tbody.innerHTML = "";
     localStorage.removeItem("EC_registros");
   }
 
-  function persistConfig(){
+  function persistConfig() {
     const data = {
       sonido: EC.sonidoActivo,
       intIdx: EC.intervaloIdx,
@@ -185,34 +185,34 @@ console.log("✅ init() ejecutado correctamente");
     localStorage.setItem("EC_cfg", JSON.stringify(data));
   }
 
-  function restoreFromStorage(){
-    try{
+  function restoreFromStorage() {
+    try {
       const raw = localStorage.getItem("EC_cfg");
       if (!raw) return;
       const cfg = JSON.parse(raw);
       EC.sonidoActivo = !!cfg.sonido;
       btnSonido.textContent = EC.sonidoActivo ? "🔊 Sonido: ON" : "🔈 Sonido: OFF";
       if (Number.isInteger(cfg.intIdx)) EC.intervaloIdx = cfg.intIdx;
-      if (typeof cfg.uMin === "number") { 
-        EC.umbralMin = cfg.uMin; 
-        rngMin.value = EC.umbralMin; 
-        lblMin.textContent = EC.umbralMin+"%"; 
+      if (typeof cfg.uMin === "number") {
+        EC.umbralMin = cfg.uMin;
+        rngMin.value = EC.umbralMin;
+        lblMin.textContent = EC.umbralMin + "%";
       }
       if (typeof cfg.uMax === "number") {
         EC.umbralMax = cfg.uMax;
-        if (isFinite(EC.umbralMax)){
+        if (isFinite(EC.umbralMax)) {
           chkInf.checked = false; wrapMax.style.display = "flex";
-          rngMax.value = EC.umbralMax; lblMax.textContent = EC.umbralMax+"%";
+          rngMax.value = EC.umbralMax; lblMax.textContent = EC.umbralMax + "%";
         } else {
           chkInf.checked = true; wrapMax.style.display = "none"; lblMax.textContent = "∞";
         }
       }
       if (Array.isArray(cfg.sel)) EC.seleccionadas = new Set(cfg.sel);
       lblIntervalo.textContent = INTERVALOS[EC.intervaloIdx];
-    }catch(e){}
+    } catch (e) { }
   }
 
-  // 🕒 ======= Cuenta atrás sincronizada =======
+  // 🕒 Cuenta atrás
   function startCountdown() {
     if (!countdownEl) return;
     clearInterval(EC.countdownTimer);
@@ -229,7 +229,7 @@ console.log("✅ init() ejecutado correctamente");
   }
 
   // ======= Bucle principal =======
-  async function tick(){
+  async function tick() {
     if (!EC.running) return;
     startCountdown();
     const interval = INTERVALOS[EC.intervaloIdx];
@@ -242,11 +242,18 @@ console.log("✅ init() ejecutado correctamente");
         const res = await window.EC_fetchLatestStats(symbol, interval);
         if (!res) continue;
 
-        const { changePct, tipo, openTime, openPrice, high, low, closePrice } = res;
+        const { changePct, tipo, openTime, openPrice, high, low, closePrice, volume, volAvg } = res;
         const hora = new Date().toLocaleTimeString();
 
+        let nivelVolumen = "normal";
+        if (volume >= volAvg * 2) nivelVolumen = "alto";
+        else if (volume < volAvg * 1.2) nivelVolumen = "bajo";
+
         if (statusText) {
-          statusText.innerHTML += `Analizando ${base} ${interval} ${hora} — Oscilación (${changePct.toFixed(3)}%)<br>`;
+          let msg = `Analizando ${base} ${interval} ${hora} — Oscilación (${changePct.toFixed(3)}%)`;
+          if (nivelVolumen === "alto") msg += " 💥 Volumen MUY ALTO";
+          else if (nivelVolumen === "bajo") msg += " 🔹 Volumen bajo";
+          statusText.innerHTML += msg + "<br>";
         }
 
         const minOk = changePct >= EC.umbralMin || changePct <= -EC.umbralMin;
@@ -258,11 +265,10 @@ console.log("✅ init() ejecutado correctamente");
             EC.lastAlertKey[key] = true;
             setSemaforo(tipo);
             beep(tipo);
-
-            // 🟢 Registro extendido con precios OHLC
             addRegistro({
               symbol, interval, hora, changePct, tipo,
-              open: openPrice, high, low, close: closePrice
+              open: openPrice, high, low, close: closePrice,
+              volume, volAvg, nivelVolumen
             });
           }
         }
@@ -272,25 +278,29 @@ console.log("✅ init() ejecutado correctamente");
     }
   }
 
-  // 🟢 Añade filas con datos completos (incluye OHLC)
-  function addRegistro({ symbol, interval, hora, changePct, tipo, open, high, low, close }) {
+  // 🟢 Añadir filas con volumen
+  function addRegistro({ symbol, interval, hora, changePct, tipo, open, high, low, close, volume, volAvg, nivelVolumen }) {
     if (!tbody) return;
     const tr = document.createElement("tr");
     tr.classList.add("new");
+    const extra = nivelVolumen === "alto" ? "💥" : (nivelVolumen === "bajo" ? "🔹" : "⚡");
     tr.innerHTML = `
       <td>${symbol}</td>
       <td>${interval}</td>
       <td>${hora}</td>
       <td>${changePct.toFixed(3)}%</td>
-      <td>${tipo}</td>
+      <td>${tipo} ${extra}</td>
       <td>${open?.toFixed(3) ?? "—"}</td>
       <td>${high?.toFixed(3) ?? "—"}/${low?.toFixed(3) ?? "—"}</td>
       <td>${close?.toFixed(3) ?? "—"}</td>
+      <td>${volume?.toLocaleString(undefined, { maximumFractionDigits: 3 }) ?? "—"}</td>
+      <td>${volAvg?.toLocaleString(undefined, { maximumFractionDigits: 3 }) ?? "—"}</td>
     `;
     tbody.prepend(tr);
   }
 
-  function start(){
+  // 🟢 Controles start/stop
+  function start() {
     if (EC.running) return;
     EC.running = true;
     setSemaforo("off");
@@ -299,9 +309,9 @@ console.log("✅ init() ejecutado correctamente");
     startCountdown();
   }
 
-  function stop(){
+  function stop() {
     EC.running = false;
-    if (EC.timer){ clearInterval(EC.timer); EC.timer = null; }
+    if (EC.timer) { clearInterval(EC.timer); EC.timer = null; }
     clearInterval(EC.countdownTimer);
     setSemaforo("off");
     const statusText = document.getElementById("status-text");
@@ -309,10 +319,11 @@ console.log("✅ init() ejecutado correctamente");
     if (countdownEl) countdownEl.textContent = "--";
   }
 
+  // === Inicialización ===
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", init);
   } else {
     init();
   }
 
-})();
+})(); // ✅ Cierre final IIFE
